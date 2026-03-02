@@ -1,0 +1,13 @@
+# CMake & Build Artifacts
+build/
+CMakeFiles/
+
+# Compiled Python Modules
+*.so
+*.pyd
+*.dylib
+__pycache__/
+
+# OS & Editor
+.DS_Store
+.vscode/
