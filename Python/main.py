@@ -72,6 +72,7 @@ def plot_dashboard(all_weights, trace, tickers, returns):
 
     plt.tight_layout()
     plt.show()
+    
 def main():
     tickers = ['AAPL','GOOGL', 'MSFT', 'TSLA']
     mu, sigma, returns = get_market_statistics(tickers)
