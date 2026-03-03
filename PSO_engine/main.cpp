@@ -55,31 +55,34 @@ struct Particle {
             for (size_t i = 0; i < position.size(); i++) {
                 position[i] = position[i] / sum;
             }
-        }
-        
+        }   
     }
 
     double calculate_fitness(const MarketData& data) {
         double port_return = 0.0;
         double port_variance = 0.0;
+        double penalty = 0.0;
 
-        // calculate expected portfolio return
         for (size_t i = 0; i < position.size(); i++) {
             port_return += position[i] * data.expected_returns[i];
-            
-            // calculate portfolio variance
+
+            // Penalize weights that exceed 40% (0.4)
+            if (position[i] > 0.4) {
+                penalty += std::pow(position[i] - 0.4, 2) * 10.0; // Quadratic penalty
+            }
+
             for (size_t j = 0; j < position.size(); j++) {
                 port_variance += position[i] * position[j] * data.covariance_matrix[i][j];
             }
         }
 
         double volatility = std::sqrt(port_variance);
-        
-        // prevent division by zero
-        if (volatility == 0.0) return -9999.0; 
+        if (volatility == 0.0) return -9999.0;
 
-        // return sharpe ratio
-        return (port_return - data.risk_free_rate) / volatility; 
+        double sharpe = (port_return - data.risk_free_rate) / volatility;
+        
+        // The "Constrained" Sharpe Ratio
+        return sharpe - penalty; 
     }
 };
 
