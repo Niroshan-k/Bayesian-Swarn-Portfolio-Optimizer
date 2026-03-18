@@ -3,6 +3,10 @@
 #include <cmath>
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <random>
+
+std::mt19937 rng(std::random_device{}());
+std::uniform_real_distribution<double> dist(0.0, 1.0);
 
 struct MarketData {
     std::vector<double> expected_returns; 
@@ -26,7 +30,8 @@ struct Particle {
         
         // Initialize with random positions
         for (int i = 0; i < num_assets; i++) {
-            position[i] = (double)rand() / RAND_MAX;
+            position[i] = dist(rng) / RAND_MAX;
+            velocity[i] = (dist(rng) / RAND_MAX - 0.5) * 0.1;
         }
         normalize();
     }
@@ -106,6 +111,10 @@ public:
     void optimize(int epochs, const MarketData& data) {
         for (int i = 0; i < epochs; i++) {
             for (size_t j = 0; j < particles.size(); j++) {
+                // Pass global best to velocity, move the particle, and normalize
+                particles[j].update_velocity(global_best_position, 0.7, 1.5, 1.5);
+                particles[j].normalize();
+
                 double fitness = particles[j].calculate_fitness(data);
                 
                 if (fitness > particles[j].best_fitness) {
@@ -117,10 +126,6 @@ public:
                     global_best_fitness = fitness;
                     global_best_position = particles[j].position;
                 }
-                
-                // Pass global best to velocity, move the particle, and normalize
-                particles[j].update_velocity(global_best_position, 0.7, 1.5, 1.5);
-                particles[j].normalize();
             }
         }
     }

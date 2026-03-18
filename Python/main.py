@@ -1,6 +1,6 @@
 import sys
 # Point Python to your compiled .so file
-sys.path.append('../build/PSO_engine') 
+sys.path.append('./build/PSO_engine') 
 import pso_engine
 from src.load_data import get_market_statistics
 import pandas as pd
@@ -13,7 +13,10 @@ def get_model_scenarios(mu, returns, tickers):
     obs_returns = returns.values
     with pm.Model() as portfolio_model:
         # use exponential prior so the data can decide how 'fat' the tails are
-        nu = pm.Exponential("nu", 1/10) + 2
+        # 1. Register the base variable
+        nu_minus_2 = pm.Exponential("nu_minus_2", 1/10)
+        # 2. Add 2 deterministically
+        nu = pm.Deterministic("nu", nu_minus_2 + 2)
         # use a normal prior centered around historical average (mu)
         expected_rtns = pm.Normal("expected_rtns", mu=mu.values, sigma=0.01, shape=len(tickers))
         # tell PyMC: "The real returns we saw follow a Student-T distribution"
@@ -74,7 +77,17 @@ def plot_dashboard(all_weights, trace, tickers, returns):
     plt.show()
     
 def main():
-    tickers = ['AAPL','GOOGL', 'MSFT', 'TSLA']
+    tickers = [
+        # US Large Cap
+        'AAPL', 'MSFT', 'GOOGL', 'JPM', 'JNJ',
+        # Different sectors
+        'XOM',   # Energy
+        'GLD',   # Gold ETF
+        'TLT',   # Long-term bonds ETF
+        'VNQ',   # Real estate
+        # International
+        'EEM',   # Emerging markets
+    ]
     mu, sigma, returns = get_market_statistics(tickers)
 
     print("Annualized Expected Returns:\n", mu)

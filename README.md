@@ -14,7 +14,7 @@ The engine maximizes the **Sharpe Ratio** while strictly penalizing over-concent
     To prevent 100% allocations ("corner solutions"), the engine applies a quadratic penalty if any asset weight $w_i$ exceeds a 40% threshold:
     $$S = \frac{R_p - R_f}{\sigma_p} - \sum_{w_i > 0.4} 10.0 (w_i - 0.4)^2$$
 
-## 🐝 2. Particle Swarm Optimization (PSO)
+## 🐬 2. Particle Swarm Optimization (PSO)
 
 The C++ backend simulates a swarm of particles navigating the multi-dimensional weight space. Each particle adjusts its trajectory based on its own memory and the swarm's collective intelligence.
 
